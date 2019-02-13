@@ -50,4 +50,47 @@ class UserAddressesController extends Controller
 
         return redirect()->route('user_addresses.index');
     }
+
+    /**
+     * 编辑收货地址
+     * @param UserAddress $address
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function edit(UserAddress $address)
+    {
+        return view('user_addresses.create_and_edit', compact('address'));
+    }
+
+    /**
+     * 更新收货地址
+     * @param UserAddress $address
+     * @param UserAddressRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(UserAddress $address, UserAddressRequest $request)
+    {
+        $address->update($request->only([
+            'province',
+            'city',
+            'district',
+            'address',
+            'zip',
+            'contact_name',
+            'contact_phone',
+        ]));
+        return redirect()->route('user_addresses.index');
+    }
+
+    /**
+     * 删除收货地址
+     * @param UserAddress $address
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
+    public function destroy(UserAddress $address)
+    {
+        $address->delete();
+
+        return redirect()->route('user_addresses.index');
+    }
 }
