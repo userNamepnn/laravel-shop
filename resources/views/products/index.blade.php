@@ -35,7 +35,7 @@
 
                     <div class="row products-list">
                         @foreach($products as $product)
-                            <div class="col-3 product-item">
+                            <div class="col-3 product-item" data-id="{{ $product->id }}">
                                 <div class="product-content">
                                     <div class="top">
                                         <div class="img"><img src="{{ $product->image_url }}" alt=""></div>
@@ -64,8 +64,13 @@
             $('.search-form input[name=search]').val(filters.search);
             $('.search-form select[name=order]').val(filters.order);
 
-            $('.search-form select[name=order]').on('change', function() {
+            $('.search-form select[name=order]').on('change', function () {
                 $('.search-form').submit();
+            });
+
+            $('.product-item').click(function () {
+                var product_id = $(this).data('id') || 1;
+                window.location.href = "/products/" + product_id;
             });
         })
     </script>
