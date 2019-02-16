@@ -32,12 +32,15 @@
                                                 data-toggle="tooltip"
                                                 title="{{ $sku->description }}"
                                                 data-placement="bottom">
-                                            <input type="radio" name="skus" autocomplete="off" value="{{ $sku->id }}"> {{ $sku->title }}
+                                            <input type="radio" name="skus" autocomplete="off"
+                                                   value="{{ $sku->id }}"> {{ $sku->title }}
                                         </label>
                                     @endforeach
                                 </div>
                             </div>
-                            <div class="cart_amount"><label>数量</label><input type="text" class="form-control form-control-sm" value="1"><span>件</span><span
+                            <div class="cart_amount"><label>数量</label><input type="text" id="amount"
+                                                                             class="form-control form-control-sm"
+                                                                             value="1"><span>件</span><span
                                         class="stock"></span></div>
                             <div class="buttons">
                                 @if($favored)
@@ -89,7 +92,7 @@
                 axios.post('{{ route('products.favor', ['product' => $product->id]) }}')
                     .then(function () { // 请求成功会执行这个回调
                         swal('操作成功', '', 'success');
-                    }, function(error) { // 请求失败会执行这个回调
+                    }, function (error) { // 请求失败会执行这个回调
                         // 如果返回码是 401 代表没登录
                         if (error.response && error.response.status === 401) {
                             swal('请先登录', '', 'error').then(
@@ -100,7 +103,7 @@
                         } else if (error.response && error.response.data.msg) {
                             // 其他有 msg 字段的情况，将 msg 提示给用户
                             swal(error.response.data.msg, '', 'error');
-                        }  else {
+                        } else {
                             // 其他情况应该是系统挂了
                             swal('系统错误', '', 'error');
                         }
@@ -116,6 +119,35 @@
                                 location.reload();
                             });
                     });
+            });
+
+            //加入购物车
+            $('.btn-add-to-cart').click(function () {
+                axios.post('{{ route('cart.add') }}', {
+                    'sku_id': $('label.active input[name=skus]').val(),
+                    'amount': $('.cart_amount input').val(),
+                }).then(function () { // 请求成功执行此回调
+                    swal('加入购物车成功', '', 'success');
+                }, function (error) { // 请求失败执行此回调
+                    if (error.response.status === 401) {
+                        // http 状态码为 401 代表用户未登陆
+                        swal('请先登录', '', 'error');
+
+                    } else if (error.response.status === 422) {
+                        // http 状态码为 422 代表用户输入校验失败
+                        var html = '<div>';
+                        _.each(error.response.data.errors, function (errors) {
+                            _.each(errors, function (error) {
+                                html += error + '<br>';
+                            })
+                        });
+                        html += '</div>';
+                        swal({content: $(html)[0], icon: 'error'})
+                    } else {
+                        // 其他情况应该是系统挂了
+                        swal('系统错误', '', 'error');
+                    }
+                })
             });
         });
     </script>
