@@ -91,11 +91,11 @@ class UserAddressesController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Exception
      */
-    public function destroy(UserAddress $user_address)
+    public function destroy(UserAddress $address)
     {
-        $this->authorize('own', $user_address);
+        $this->authorize('own', $address);
 
-        $user_address->delete();
+        $address->delete();
 
         return [];
     }
