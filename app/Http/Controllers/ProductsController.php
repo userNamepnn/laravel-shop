@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InvalidRequestException;
+use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -75,7 +76,17 @@ class ProductsController extends Controller
             $favored = boolval($user->favoriteProducts()->find($product->id));
         }
 
-        return view('products.show', compact('product', 'favored'));
+        //商品评价
+        $reviews = OrderItem::query()
+            ->with(['order.user', 'productSku']) // 预先加载关联关系
+            ->where('product_id', $product->id)
+            ->whereNotNull('review')
+            ->orderBy('reviewed_at', 'desc')
+            ->paginate(10)
+            ->get();
+        //dd($reviews);
+
+        return view('products.show', compact('product', 'favored', 'reviews'));
     }
 
     /**
