@@ -24,4 +24,6 @@ Route::group([
     //商品列表
     $router->get('/products', 'ProductsController@index');
 
+    //订单列表
+    $router->get('/orders', 'OrdersController@index')->name('admin.orders.index');
 });
