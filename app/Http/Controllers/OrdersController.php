@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InternalException;
 use App\Http\Requests\OrderRequest;
 use App\Models\Order;
 use App\Models\UserAddress;
@@ -57,5 +58,31 @@ class OrdersController extends Controller
     {
         $this->authorize('own', $order);
         return view('orders.show', ['order' => $order->load(['items.productSku', 'items.product'])]);
+    }
+
+    /**
+     * 确认收货
+     * @param Order $order
+     * @param Request $request
+     * @return Order
+     * @throws InternalException
+     */
+    public function received(Order $order, Request $request)
+    {
+        //校验权限
+        $this->authorize('own', $order);
+
+        //判断订单发货状态是否正确
+        if ($order->ship_status !== Order::SHIP_STATUS_DELIVERED) {
+            throw new InternalException('物流状态有误');
+        }
+
+        //更新物流状态
+        $order->update([
+            'ship_status' => Order::SHIP_STATUS_RECEIVED,
+        ]);
+
+        //返回原页面
+        return $order;
     }
 }
