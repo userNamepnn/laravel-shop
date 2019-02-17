@@ -3,39 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddCartRequest;
-use App\Models\CartItem;
 use App\Models\ProductSku;
+use App\Services\CartService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    /**
-     * 加入购物车
-     * @param AddCartRequest $request
-     * @return array
-     */
-    public function add(AddCartRequest $request)
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
     {
-        $user = $request->user();
-        $skuId = $request->input('sku_id');
-        $amount = $request->input('amount');
-
-        //从数据库查看该商品是否已存在
-        if ($cart = $user->cartItems()->where('product_sku_id', '=', $skuId)->first()) {
-            //若存在,直接数量加1
-            $cart->update([
-                'amount' => $cart->amount + $amount,
-            ]);
-        } else {
-
-            //否则创建一个新记录
-            $cart = new CartItem(['amount' => $amount]);
-            $cart->user()->associate($user);
-            $cart->productSku()->associate($skuId);
-            $cart->save();
-        }
-
-        return [];
+        $this->cartService = $cartService;
     }
 
     /**
@@ -44,11 +22,22 @@ class CartController extends Controller
      */
     public function index(Request $request)
     {
-        $cartItems = $request->user()->cartItems()->with(['productSku.product'])->get();
-
+        $cartItems = $this->cartService->get();
         $addresses = $request->user()->addresses()->orderBy('last_used_at', 'desc')->get();
 
         return view('cart.index', compact('cartItems', 'addresses'));
+    }
+
+    /**
+     * 加入购物车
+     * @param AddCartRequest $request
+     * @return array
+     */
+    public function add(AddCartRequest $request)
+    {
+        $this->cartService->add($request->input('sku_id'), $request->input('amount'));
+
+        return [];
     }
 
     /**
@@ -59,7 +48,7 @@ class CartController extends Controller
      */
     public function remove(ProductSku $sku, Request $request)
     {
-        $request->user()->cartItems()->where('product_sku_id', $sku->id)->delete();
+        $this->cartService->remove($sku->id);
 
         return [];
     }
