@@ -82,7 +82,7 @@ class ProductsController extends Controller
             ->where('product_id', $product->id)
             ->whereNotNull('review')
             ->orderBy('reviewed_at', 'desc')
-            ->paginate(10)
+            ->limit(10)
             ->get();
         //dd($reviews);
 

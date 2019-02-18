@@ -81,15 +81,19 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    @foreach($reviews as $review)
-                                        <tr>
-                                            <td>{{ $review->order->user->name }}</td>
-                                            <td>{{ $review->productSku->title }}</td>
-                                            <td>{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</td>
-                                            <td>{{ $review->review }}</td>
-                                            <td>{{ $review->reviewed_at->format('Y-m-d H:i') }}</td>
-                                        </tr>
-                                    @endforeach
+                                    @if(count($reviews) > 0)
+                                        @foreach($reviews as $review)
+                                            <tr>
+                                                <td>{{ $review->order->user->name }}</td>
+                                                <td>{{ $review->productSku->title }}</td>
+                                                <td>{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</td>
+                                                <td>{{ $review->review }}</td>
+                                                <td>{{ $review->reviewed_at->format('Y-m-d H:i') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr><td colspan="5">暂无评价</td></tr>
+                                    @endif
                                     </tbody>
                                 </table>
                                 <!-- 评论列表结束 -->

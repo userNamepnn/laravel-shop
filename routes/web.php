@@ -47,15 +47,8 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('orders/{order}', 'OrdersController@show')->name('orders.show');
 
     //支付宝支付
-    Route::get('alipay', function() {
-        return app('alipay')->web([
-            'out_trade_no' => time(),
-            'total_amount' => '1',
-            'subject' => 'test subject - 测试',
-        ]);
-    });
     Route::get('payment/{order}/alipay', 'PaymentController@payByAlipay')->name('payment.alipay');
-
+    Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
     //微信支付
     Route::get('payment/{order}/wechat', 'PaymentController@payByWechat')->name('payment.wechat');
     //确认收货
