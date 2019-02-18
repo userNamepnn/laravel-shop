@@ -4,8 +4,11 @@
 /public/js
 /public/css
 /public/mix-manifest.json
+/public/fonts
+/resources/wechat_pay
 /storage/*.key
 /vendor
+/.idea
 .env
 .phpunit.result.cache
 Homestead.json
