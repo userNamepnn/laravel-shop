@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\OrderReviewed;
 use App\Exceptions\InternalException;
 use App\Exceptions\InvalidRequestException;
+use App\Http\Requests\ApplyRefundRequest;
 use App\Http\Requests\OrderRequest;
 use App\Http\Requests\SendReviewRequest;
 use App\Models\Order;
@@ -90,7 +91,12 @@ class OrdersController extends Controller
         return $order;
     }
 
-    //
+    /**
+     * 评论页面
+     * @param Order $order
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @throws InvalidRequestException
+     */
     public function review(Order $order)
     {
         $this->authorize('own', $order);
@@ -104,7 +110,13 @@ class OrdersController extends Controller
         return view('orders.review', ['order' => $order->load(['items.productSku', 'items.product'])]);
     }
 
-    //
+    /**
+     * 发表评论
+     * @param Order $order
+     * @param SendReviewRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws InvalidRequestException
+     */
     public function sendReview(Order $order, SendReviewRequest $request)
     {
         // 校验权限
@@ -136,5 +148,32 @@ class OrdersController extends Controller
         event(new OrderReviewed($order));
 
         return redirect()->back();
+    }
+
+    public function applyRefund(Order $order, ApplyRefundRequest $request)
+    {
+        //校验订单是否属于当前用户
+        $this->authorize('own', $order);
+
+        //校验订单是否已付款
+        if (!$order->paid_at){
+            throw new InvalidRequestException('订单尚未付款');
+        }
+
+        //校验订单退款状态
+        if ($order->refund_status !== Order::REFUND_STATUS_PENDING) {
+            throw new InvalidRequestException('该订单已经申请过退款，请勿重复申请');
+        }
+
+        // 将用户输入的退款理由放到订单的 extra 字段中
+        $extra                  = $order->extra ?: [];
+        $extra['refund_reason'] = $request->input('reason');
+        // 将订单退款状态改为已申请退款
+        $order->update([
+            'refund_status' => Order::REFUND_STATUS_APPLIED,
+            'extra'         => $extra,
+        ]);
+
+        return $order;
     }
 }

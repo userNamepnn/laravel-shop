@@ -38,9 +38,13 @@ class PaymentController extends Controller
     // 支付宝前端回调页面
     public function alipayReturn()
     {
-        // 校验提交的参数是否合法
-        $data = app('alipay')->verify();
-        dd($data);
+        try {
+            app('alipay')->verify();
+        } catch (\Exception $e) {
+            return view('pages.error', ['msg' => '数据不正确']);
+        }
+
+        return view('pages.success', ['msg' => '付款成功']);
     }
 
     // 支付宝服务器端回调

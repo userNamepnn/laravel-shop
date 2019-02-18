@@ -56,6 +56,9 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     //商品评价
     Route::get('orders/{order}/review', 'OrdersController@review')->name('orders.review.show');
     Route::post('orders/{order}/review', 'OrdersController@sendReview')->name('orders.review.store');
+
+    //退款
+    Route::post('orders/{order}/apply_refund', 'OrdersController@applyRefund')->name('orders.apply_refund');
 });
 
 //支付宝支付回调
