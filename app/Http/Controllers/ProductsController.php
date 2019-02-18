@@ -132,6 +132,7 @@ class ProductsController extends Controller
     {
         $products = $request->user()->favoriteProducts()->paginate(16);
 
+        
         return view('products.favorites', compact('products'));
     }
 }
